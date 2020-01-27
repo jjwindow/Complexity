@@ -6,6 +6,50 @@ J. J. Window
 import numpy as np
 from random import choice
 from random import random
+import matplotlib.pyplot as plt
+
+class Datalog:
+    """
+    Object class to save all iterations of the ricepile in arrays which can later be 
+    accessed. Needs pile dimension L and threshold selection probability p to instantiate.
+
+    Methods:
+    add(newHeights, newGrads, newTholds) - appends the provided height, gradient and threshold 
+                                           arrays to the object.
+    getSnapshot(n)                       - returns a tuple of arrays containing values of heights, 
+                                           gradients and thresholds for the pile after drive n.
+    getFullHist()                        - returns tuple of arrays containing all snapshots.
+    """
+    def __init__(self, L, p):
+        self.L = L
+        self.p = p
+        self.heightsLog = []
+        self.gradsLog = []
+        self.tholdsLog = []
+
+    def add(self, newHeights, newGrads, newTholds):
+        """
+        Adds new data to class attributes.
+        """
+        self.heightsLog.append(newHeights)
+        self.gradsLog.append(newGrads)
+        self.tholdsLog.append(newTholds)
+
+    def getSnapshot(self, n):
+        """
+        Returns the nth instance of the datalog - i.e, a snapshot of the pile after drive n.
+        """
+        if type(n) is not int:
+            raise TypeError("n parameter must be an integer.")
+        return (self.heightsLog[n],self.gradsLog[n],self.tholdsLog[n])
+    
+    def getFullHist(self):
+        """
+        Returns all class attributes in full.
+        """
+        return (self.heightsLog, self.gradsLog, self.tholdsLog)
+
+
 
 class Oslo:
     @staticmethod    
@@ -21,7 +65,6 @@ class Oslo:
         return z_th
 
     def __init__(self, L, p):
-
         # Check arguments are valid
         L = int(L)
         if type(p) is not float:
@@ -32,6 +75,7 @@ class Oslo:
         self.L = L
         self.p = p
         self.exited = 0
+        self.dataLog = Datalog(self.L, self.p)
 
         # Initialise pile with empty sites
         self.pile = np.zeros(L) 
@@ -111,6 +155,7 @@ class Oslo:
                 # Exit loop if a complete pass through all sites has
                 # been made without a relaxation.
                 completePass = True
+                self.dataLog.add(self.pile, self.z, self.z_th)
 
 
     def returnpile(self):
@@ -121,13 +166,30 @@ class Oslo:
         return self.z_th
     def returnexited(self):
         return self.exited
+    def returnLog(self):
+        return self.dataLog
 
-pile = Oslo(5, 0.5)
+### TO DO ###
+#   - Figure out animations
+#   - Define func in Datalog that animates using elements in heights.
+
+L = 64
+p=0.5
+pile = Oslo(L, p)
 a = 0
-while a < 50:
+while a < 2000:
     a += 1
     pile.drive()
     pile.relax()
+
+pileLog = pile.returnLog()
+(h, z, z_th) = pileLog.getSnapshot(1999)
+
+L_axis = [i for i in range(0, L)]
+plt.bar(L_axis, pile.returnpile(), width = 1, align = 'edge')
+plt.show()
+plt.bar(L_axis, h, width = 1, align = 'edge')
+plt.show()
 print(pile.returnpile())
 print(pile.returngrad())
 print(pile.returnthold())
