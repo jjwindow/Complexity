@@ -114,7 +114,9 @@ class Oslo:
         Adds a 'grain' to the leftmost site of the pile.
         """
         self.pile[0] += 1
+        self.N += 1
         self.update_z()
+        print("drive: ", self.N)
 
     def relax(self):
         """
@@ -124,6 +126,7 @@ class Oslo:
         and the surrounding gradients are altered. This continues until the
         whole pile has been checked without needing to perform a relaxation.
         """
+        print("relax")
         completePass = False
         while completePass == False:
             # Counts how many sites have been evaluated without
@@ -164,13 +167,14 @@ class Oslo:
 
                     # Choose new threshold slope value
                     self.z_th[i] = self.thold_gen(self.p)
-                elif not(relax) and B:
+                elif (relax == False) and B:
                     # If grain is at end of pile but doesn't leave:
-                    self.exitarray.append(0)
+                    self.exitArray.append(0)
                 else:
                     noRelax += 1
+                    print(noRelax)
             
-            if noRelax == self.L:
+            if noRelax == self.L - 1:
                 # Exit loop if a complete pass through all sites has
                 # been made without a relaxation.
                 completePass = True
@@ -181,8 +185,10 @@ class Oslo:
         Checks ratio of outgoing grains to input grains. If ratio is ~1,
         then system is in steady state.
         """
+        if self.N < count:
+            return False
         grainsOut = sum(self.exitArray[-count:])
-        precision = 0.98    # Approx steady state threshold value 
+        precision = 0.9    # Approx steady state threshold value 
         if grainsOut/count >= precision:
             return True
         else:
@@ -204,7 +210,7 @@ class Oslo:
 #   - Figure out animations
 #   - Define func in Datalog that animates using elements in heights.
 
-L = 64
+L = 8
 p=0.5
 pile = Oslo(L, p)
 a = 0
@@ -212,6 +218,7 @@ while pile.steadyStateCheck(250) == False:
     # a += 1
     pile.drive()
     pile.relax()
+    print("ssecheck")
 
 pileLog = pile.returnLog()
 h, z, z_th = pileLog.getSnapshot(-1)
