@@ -116,7 +116,7 @@ class Oslo:
         self.pile[0] += 1
         self.N += 1
         self.update_z()
-        print("drive: ", self.N)
+        # print("drive: ", self.N)
 
     def relax(self):
         """
@@ -126,8 +126,8 @@ class Oslo:
         and the surrounding gradients are altered. This continues until the
         whole pile has been checked without needing to perform a relaxation.
         """
-        print("relax")
         completePass = False
+        exited = 0
         while completePass == False:
             # Counts how many sites have been evaluated without
             # a relaxation needed.
@@ -139,10 +139,13 @@ class Oslo:
                 # Check if loop is at beginning or end
                 A = bool(i == 0)
                 B = bool(i == self.L-1)
+                # print(i, "Drive = ", self.N)
+                # print(i, ", ", _z)
                 
                 if relax:
                     # If a relaxation is needed, reset to 0.
                     noRelax = 0
+                    # print("relax")
                     # Remove grain from site
                     self.pile[i] -= 1
                     # Check if site is first or last and apply
@@ -157,7 +160,8 @@ class Oslo:
                         self.z[i-1] += 1
                         # Increase count of grains leaving system
                         self.exitNum += 1
-                        self.exitArray.append(1)
+                        # self.exitArray.append(1)
+                        exited += 1
                     else:
                         self.z[i] -= 2
                         self.z[i+1] += 1
@@ -167,17 +171,19 @@ class Oslo:
 
                     # Choose new threshold slope value
                     self.z_th[i] = self.thold_gen(self.p)
-                elif (relax == False) and B:
+                # elif (relax == False) and B:
                     # If grain is at end of pile but doesn't leave:
-                    self.exitArray.append(0)
+                    # self.exitArray.append(0)
                 else:
                     noRelax += 1
-                    print(noRelax)
+                    # print(noRelax)
             
-            if noRelax == self.L - 1:
-                # Exit loop if a complete pass through all sites has
-                # been made without a relaxation.
-                completePass = True
+                if noRelax == self.L - 1:
+                    # Exit loop if a complete pass through all sites has
+                    # been made without a relaxation.
+                    completePass = True
+                self.exitArray.append(exited)
+                # print("exited: ", exited)
                 self.dataLog.add(self.pile, self.z, self.z_th)
 
     def steadyStateCheck(self, count):
@@ -186,13 +192,17 @@ class Oslo:
         then system is in steady state.
         """
         if self.N < count:
+            print("N: ", self.N)
             return False
-        grainsOut = sum(self.exitArray[-count:])
-        precision = 0.9    # Approx steady state threshold value 
-        if grainsOut/count >= precision:
-            return True
         else:
-            return False
+            grainsOut = sum(self.exitArray[-count:])
+            precision = 0.9    # Approx steady state threshold value 
+            if grainsOut/count >= precision:  
+                print("ratio: ", grainsOut/count)
+                return True
+            else:
+                print("ratio: ", grainsOut/count)
+                return False
 
     def returnpile(self):
         return self.pile
@@ -200,8 +210,8 @@ class Oslo:
         return self.z
     def returnthold(self):
         return self.z_th
-    def returnexited(self):
-        return self.exited
+    def returnexited(self, count):
+        return self.exitArray[-count:]
     def returnLog(self):
         return self.dataLog
 
@@ -214,11 +224,11 @@ L = 8
 p=0.5
 pile = Oslo(L, p)
 a = 0
-while pile.steadyStateCheck(250) == False:
-    # a += 1
+r = pile.steadyStateCheck(1000)
+while r == False:
     pile.drive()
     pile.relax()
-    print("ssecheck")
+    r = pile.steadyStateCheck(1000)
 
 pileLog = pile.returnLog()
 h, z, z_th = pileLog.getSnapshot(-1)
@@ -227,6 +237,5 @@ print(pileLog.getHeightAvg(250))
 L_axis = [i for i in range(0, L)]
 plt.bar(L_axis, pile.returnpile(), width = 1, align = 'edge')
 plt.show()
-plt.bar(L_axis, h, width = 1, align = 'edge')
-plt.show()
+
 
