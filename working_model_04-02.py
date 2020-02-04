@@ -233,7 +233,7 @@ while r == False:
 pileLog = pile.returnLog()
 h, z, z_th = pileLog.getSnapshot(-1)
 print(pileLog.getHeightAvg(250))
-print([pileLog.heightsLog[-i][0] for i in range(0,250)])
+# print([pileLog.heightsLog[-i][0] for i in range(0,250)])
 L_axis = [i for i in range(0, L)]
 plt.bar(L_axis, pile.returnpile(), width = 1, align = 'edge')
 plt.show()
