@@ -6,6 +6,7 @@ J. J. Window
 import numpy as np
 from random import choice
 from random import random
+import copy
 import matplotlib.pyplot as plt
 
 class Datalog:
@@ -31,9 +32,9 @@ class Datalog:
         """
         Adds new data to class attributes.
         """
-        self.heightsLog.append(newHeights)
-        self.gradsLog.append(newGrads)
-        self.tholdsLog.append(newTholds)
+        self.heightsLog.append(copy.copy(newHeights))
+        self.gradsLog.append(copy.copy(newGrads))
+        self.tholdsLog.append(copy.copy(newTholds))
 
     def getSnapshot(self, n):
         """
@@ -88,7 +89,7 @@ class Oslo:
         self.L = L                                      # Size of system
         self.p = p                                      # Prob of choosing z_th = 1 at relaxation
         self.exitNum = 0  
-        self.exitArray = []                               # Number of grains out of system
+        self.exitArray = []                             # Number of grains out of system
         self.N = 0                                      # Number of grains added to system
         self.dataLog = Datalog(self.L, self.p)          # Instance of datalog
 
@@ -98,7 +99,6 @@ class Oslo:
         self.z = [i-j for i, j in zip(self.pile, self.pile[1:])]
         # Add i=L gradient (0 at initialisation)
         self.z.append(0)
-
         self.z_th = [self.thold_gen(self.p) for _ in range(0, self.L)]
 
     def update_z(self):
@@ -116,7 +116,6 @@ class Oslo:
         self.pile[0] += 1
         self.N += 1
         self.update_z()
-        # print("drive: ", self.N)
 
     def relax(self):
         """
@@ -139,13 +138,10 @@ class Oslo:
                 # Check if loop is at beginning or end
                 A = bool(i == 0)
                 B = bool(i == self.L-1)
-                # print(i, "Drive = ", self.N)
-                # print(i, ", ", _z)
                 
                 if relax:
                     # If a relaxation is needed, reset to 0.
                     noRelax = 0
-                    # print("relax")
                     # Remove grain from site
                     self.pile[i] -= 1
                     # Check if site is first or last and apply
@@ -160,7 +156,6 @@ class Oslo:
                         self.z[i-1] += 1
                         # Increase count of grains leaving system
                         self.exitNum += 1
-                        # self.exitArray.append(1)
                         exited += 1
                     else:
                         self.z[i] -= 2
@@ -171,20 +166,21 @@ class Oslo:
 
                     # Choose new threshold slope value
                     self.z_th[i] = self.thold_gen(self.p)
-                # elif (relax == False) and B:
-                    # If grain is at end of pile but doesn't leave:
-                    # self.exitArray.append(0)
+
                 else:
                     noRelax += 1
-                    # print(noRelax)
             
                 if noRelax == self.L - 1:
                     # Exit loop if a complete pass through all sites has
                     # been made without a relaxation.
                     completePass = True
-                self.exitArray.append(exited)
-                # print("exited: ", exited)
-                self.dataLog.add(self.pile, self.z, self.z_th)
+        self.exitArray.append(exited)
+        self.dataLog.add(self.pile, self.z, self.z_th)
+
+    def addGrain(self):
+        self.drive()
+        self.relax()
+        return  None
 
     def steadyStateCheck(self, count):
         """
@@ -192,16 +188,13 @@ class Oslo:
         then system is in steady state.
         """
         if self.N < count:
-            print("N: ", self.N)
             return False
         else:
             grainsOut = sum(self.exitArray[-count:])
             precision = 0.9    # Approx steady state threshold value 
             if grainsOut/count >= precision:  
-                print("ratio: ", grainsOut/count)
                 return True
             else:
-                print("ratio: ", grainsOut/count)
                 return False
 
     def returnpile(self):
@@ -220,7 +213,7 @@ class Oslo:
 #   - Figure out animations
 #   - Define func in Datalog that animates using elements in heights.
 
-L = 16
+L = 32
 p=0.5
 pile = Oslo(L, p)
 a = 0
@@ -233,9 +226,17 @@ while r == False:
 pileLog = pile.returnLog()
 h, z, z_th = pileLog.getSnapshot(-1)
 print(pileLog.getHeightAvg(250))
-# print([pileLog.heightsLog[-i][0] for i in range(0,250)])
 L_axis = [i for i in range(0, L)]
 plt.bar(L_axis, pile.returnpile(), width = 1, align = 'edge')
 plt.show()
+
+j = 0
+while j < 5:
+    pile.drive()
+    pile.relax()
+    plt.bar(L_axis, pile.returnpile(), width = 1, align = 'edge')
+    j += 1
+pileLog = pile.returnLog()
+
 
 
