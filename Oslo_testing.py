@@ -6,30 +6,29 @@ Imperial College London
 
 Implementation and testing of the Oslo Model module Oslo.py.
 """
+from Oslo import *
 
-L = 32
-p=0.5
-pile = Oslo(L, p)
-a = 0
+###     SYSTEM PARAMS     ###
+
+L = 32              # Define system Size
+p=0.5               # Probability that a new threshold will
+                    # have value = 1.
+pile = Oslo(L, p)   # Instantiate pile object
+
+###     PILE TESTING       ###
 r = pile.steadyStateCheck(1000)
 while r == False:
+    # Drive pile until steady steate reached
     pile.addGrain()
     r = pile.steadyStateCheck(1000)
 
-pileLog = pile.returnLog()
-h, z, z_th = pileLog.getSnapshot(-1)
-print(pileLog.getHeightAvg(250))
-L_axis = [i for i in range(0, L)]
-plt.bar(L_axis, pile.returnpile(), width = 1, align = 'edge')
-plt.show()
+pileLog = pile.returnLog()      # Retrieve pile history
+pile.plotPile()                 # Plot final pile
 
-j = 0
-while j < 5:
-    pile.drive()
-    pile.relax()
-    plt.bar(L_axis, pile.returnpile(), width = 1, align = 'edge')
-    j += 1
-pileLog = pile.returnLog()
+# Average height during steady state
+print(pileLog.getHeightAvg(250))  
+
+
 
 
 
