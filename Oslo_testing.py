@@ -10,12 +10,13 @@ from Oslo import *
 
 ###     SYSTEM PARAMS     ###
 
-L = 32              # Define system Size
+L = 64             # Define system Size
 p=0.5               # Probability that a new threshold will
                     # have value = 1.
 pile = Oslo(L, p)   # Instantiate pile object
 
 ###     PILE TESTING       ###
+
 r = pile.steadyStateCheck(1000)
 while r == False:
     # Drive pile until steady steate reached
