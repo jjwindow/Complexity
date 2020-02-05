@@ -1,7 +1,12 @@
 """
-First attempt at implementation of the Oslo model, 22/1/2020
--Alternative using OOP
 J. J. Window
+Complexity Project, Complexity & Networks
+3rd Year MSci Physics
+Imperial College London
+
+Oslo Model class module. Contains classes for a ricepile follwing
+the Oslo model algorithm, as well as a Datalog class for storing the
+history of the pile for interrogation.
 """
 import numpy as np
 from random import choice
@@ -191,51 +196,43 @@ class Oslo:
             return False
         else:
             grainsOut = sum(self.exitArray[-count:])
+            r = grainsOut/count
             precision = 0.9    # Approx steady state threshold value 
-            if grainsOut/count >= precision:  
+            if r >= precision:  
                 return True
             else:
                 return False
 
-    def returnpile(self):
+    def returnPile(self):
+        """
+        Returns the array of heights for each site in the 
+        pile. Can be plotted using a bar chart to visually 
+        show the pile height.
+        """
         return self.pile
-    def returngrad(self):
+    def plotPile(self):
+        L_axis = [i for i in range(0, self.L)]
+        plt.bar(L_axis, self.returnPile(), width = 1, align = 'edge')
+        plt.show()
+        return (L_axis, self.returnPile())
+    def returnGrad(self):
+        """
+        Return array of pile gradients for every site.
+        """
         return self.z
-    def returnthold(self):
+    def returnThold(self):
+        """
+        Returns the threshold gradient for every site.
+        """
         return self.z_th
-    def returnexited(self, count):
+    def returnExited(self, count):
+        """
+        Returns the array of grains exiting the system after
+        each relaxation.
+        """
         return self.exitArray[-count:]
     def returnLog(self):
+        """
+        Return the dataLog object of the pile.
+        """
         return self.dataLog
-
-
-### TO DO ###
-#   - Figure out animations
-#   - Define func in Datalog that animates using elements in heights.
-
-L = 32
-p=0.5
-pile = Oslo(L, p)
-a = 0
-r = pile.steadyStateCheck(1000)
-while r == False:
-    pile.addGrain()
-    r = pile.steadyStateCheck(1000)
-
-pileLog = pile.returnLog()
-h, z, z_th = pileLog.getSnapshot(-1)
-print(pileLog.getHeightAvg(250))
-L_axis = [i for i in range(0, L)]
-plt.bar(L_axis, pile.returnpile(), width = 1, align = 'edge')
-plt.show()
-
-j = 0
-while j < 5:
-    pile.drive()
-    pile.relax()
-    plt.bar(L_axis, pile.returnpile(), width = 1, align = 'edge')
-    j += 1
-pileLog = pile.returnLog()
-
-
-
