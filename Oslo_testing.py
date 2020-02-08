@@ -10,7 +10,7 @@ from Oslo import *
 
 ###     SYSTEM PARAMS     ###
 
-L = 64             # Define system Size
+L =              # Define system Size
 p=0.5               # Probability that a new threshold will
                     # have value = 1.
 pile = Oslo(L, p)   # Instantiate pile object
