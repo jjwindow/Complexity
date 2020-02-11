@@ -269,29 +269,38 @@ def execute_10_piles(L):
     p = 0.5             # Oslo model probability parameter. Can be modified for investigation.
     full_entry = []
     for i in range(10):
+        print('i: ', i)
         pile = Oslo(L, p)   # Instantiate pile
         ss = pile.steadyStateCheck(500)
-        ss_runs = 30000
+        ss_runs = 3000
         j = 0
         while ss == False:
             # Drive pile until steady steate reached
             pile.addGrain()
             r = pile.steadyStateCheck(500)
+            print('not steady state')
         while j < ss_runs:
             # After steady state reached, keep driving pile for fixed number
             # of runs. This keeps the standard deviations on the steady state
             # heights comparable.
             pile.addGrain()
+            print(j)
             j += 1
         run_entry = {'Log' : pile.returnLog(), 'Size' : L, 'Run' : i}
         full_entry.append(run_entry)
 
     n = 1
-    file_path = f'Oslo_{L}_{n}.pkl'
+    file_path = f'pickle/Oslo_{L}_{n}.pkl'
     while os.path.exists(file_path):
         n += 1
-        file_path = f'Oslo_{L}_{n}.pkl'
+        file_path = f'pickle/Oslo_{L}_{n}.pkl'
 
     with open(file_path, 'wb') as file:
         dump(full_entry, file)
+    return file_path
         
+def execute_all_sizes():
+    for i in range(2, 9):
+        L = 2**i
+        execute_10_piles(L)
+
