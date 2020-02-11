@@ -29,46 +29,71 @@ class Datalog:
     def __init__(self, L, p):
         self.L = L
         self.p = p
-        self.heightsLog = []
+        self.pileLog = []
         self.gradsLog = []
         self.tholdsLog = []
+        self.avalsLog = []
 
-    def add(self, newHeights, newGrads, newTholds):
+    def add(self, newHeights, newGrads, newTholds, newAvalanche):
         """
         Adds new data to class attributes.
         """
-        self.heightsLog.append(copy.copy(newHeights))
+        self.pileLog.append(copy.copy(newHeights))
         self.gradsLog.append(copy.copy(newGrads))
         self.tholdsLog.append(copy.copy(newTholds))
+        self.avalsLog.append(copy.copy(newAvalanche))
 
     def getSnapshot(self, n):
         """
         Returns the nth instance of the datalog - i.e, a snapshot of the pile after drive n.
+        *Used primarily for debugging*
         """
 
         if type(n) is not int:
             raise TypeError("n parameter must be an integer.")
-        return (self.heightsLog[n],self.gradsLog[n],self.tholdsLog[n])
+        return (self.pileLog[n], self.gradsLog[n], self.tholdsLog[n], self.avalsLog[n])
     
     def getFullHist(self):
         """
         Returns all class attributes in full.
         """
-        return (self.heightsLog, self.gradsLog, self.tholdsLog)
+        return (self.pileLog, self.gradsLog, self.tholdsLog, self.avalsLog)
 
     def getNumGrains(self, n):
         """
         Returns number of grains in the system at any one time.
         """
-        return sum(self.heightsLog[n])
+        return sum(self.pileLog[n])
 
     def getHeightAvg(self, n):
         """
         Returns average pile height for n most recent drives.
         """
-        return np.mean([self.heightsLog[-i][0] for i in range(0, n)])
-
-
+        return np.mean([self.pileLog[-i][0] for i in range(0, n)])
+    def getHeightsList(self):
+        """
+        Returns the array of the pile height after each drive.
+        In this case, height is defined at the number of grains 
+        at site 0, or equivalently as the sum of all the gradients 
+        in the pile.
+        """
+        return [sum(self.gradsLog[i]) for i in range(0, self.L)]
+    def getAvalSizes(self):
+        """
+        Returns array of avalanche sizes for all system drives.
+        """
+        return self.avalsLog
+    def getNumDrives(self):
+        """
+        Returns number of drives performed on the system
+        """
+        return len(self.avalsLog)
+    def plotAvalanches(self):
+        """
+        Plots the sizes of all avalanches.
+        """
+        plt.bar(*list(zip(*enumerate(self.avalsLog))))
+        plt.show()
 
 class Oslo:
     @staticmethod    
@@ -94,7 +119,7 @@ class Oslo:
         self.L = L                                      # Size of system
         self.p = p                                      # Prob of choosing z_th = 1 at relaxation
         self.exitNum = 0  
-        self.exitArray = []                             # Number of grains out of system
+        self.exitArray = []                             # Number of grains out of system          
         self.N = 0                                      # Number of grains added to system
         self.dataLog = Datalog(self.L, self.p)          # Instance of datalog
 
@@ -132,6 +157,7 @@ class Oslo:
         """
         completePass = False
         exited = 0
+        avalSize = 0
         while completePass == False:
             # Counts how many sites have been evaluated without
             # a relaxation needed.
@@ -147,6 +173,8 @@ class Oslo:
                 if relax:
                     # If a relaxation is needed, reset to 0.
                     noRelax = 0
+                    # And increase avalance size by 1 site.
+                    avalSize += 1
                     # Remove grain from site
                     self.pile[i] -= 1
                     # Check if site is first or last and apply
@@ -180,7 +208,7 @@ class Oslo:
                     # been made without a relaxation.
                     completePass = True
         self.exitArray.append(exited)
-        self.dataLog.add(self.pile, self.z, self.z_th)
+        self.dataLog.add(self.pile, self.z, self.z_th, avalSize)
 
     def addGrain(self):
         self.drive()
@@ -195,10 +223,9 @@ class Oslo:
         if self.N < count:
             return False
         else:
-            grainsOut = sum(self.exitArray[-count:])
-            r = grainsOut/count
-            precision = 0.9    # Approx steady state threshold value 
-            if r >= precision:  
+            grainsOut = np.mean(self.exitArray[-count:])
+            precision = 0.98    # Approx steady state threshold value (1 in -> 1 out)
+            if grainsOut >= precision:  
                 return True
             else:
                 return False
