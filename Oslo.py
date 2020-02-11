@@ -13,6 +13,7 @@ from random import choice
 from random import random
 import copy
 import matplotlib.pyplot as plt
+import os
 
 class Datalog:
     """
@@ -92,7 +93,7 @@ class Datalog:
         """
         Plots the sizes of all avalanches.
         """
-        plt.bar(*list(zip(*enumerate(self.avalsLog))))
+        plt.bar(*list(zip(*enumerate(self.avalsLog))), width=1, align = 'edge')
         plt.show()
 
 class Oslo:
@@ -263,3 +264,34 @@ class Oslo:
         Return the dataLog object of the pile.
         """
         return self.dataLog
+
+def execute_10_piles(L):
+    p = 0.5             # Oslo model probability parameter. Can be modified for investigation.
+    full_entry = []
+    for i in range(10):
+        pile = Oslo(L, p)   # Instantiate pile
+        ss = pile.steadyStateCheck(500)
+        ss_runs = 30000
+        j = 0
+        while ss == False:
+            # Drive pile until steady steate reached
+            pile.addGrain()
+            r = pile.steadyStateCheck(500)
+        while j < ss_runs:
+            # After steady state reached, keep driving pile for fixed number
+            # of runs. This keeps the standard deviations on the steady state
+            # heights comparable.
+            pile.addGrain()
+            j += 1
+        run_entry = {'Log' : pile.returnLog(), 'Size' : L, 'Run' : i}
+        full_entry.append(run_entry)
+
+    n = 1
+    file_path = f'Oslo_{L}_{n}.pkl'
+    while os.path.exists(file_path):
+        n += 1
+        file_path = f'Oslo_{L}_{n}.pkl'
+
+    with open(file_path, 'wb') as file:
+        dump(full_entry, file)
+        

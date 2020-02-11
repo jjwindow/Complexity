@@ -12,8 +12,8 @@ from pickle import dump, load
 
 ###     SYSTEM PARAMS     ###
 
-L = 16             # Define system Size
-p=0.5               # Probability that a new threshold will
+L = 16              # Define system Size
+p = 0.5             # Probability that a new threshold will
                     # have value = 1.
 pile = Oslo(L, p)   # Instantiate pile object
 
@@ -33,14 +33,14 @@ print(pileLog.getHeightAvg(250))
 pileLog.plotAvalanches()
 
 
-import os
-n = 1
-file_path = f'_{n}.pkl'
-while os.path.exists(file_path):
-    file_path = f'coom_{n}.pkl'
-    n += 1
+# import os
+# n = 1
+# file_path = f'_{n}.pkl'
+# while os.path.exists(file_path):
+#     file_path = f'coom_{n}.pkl'
+#     n += 1
 
-full_array = [{'hist' : hsiotpryfile, 'size' : size, 'run'}]
+# full_array = [{'hist' : hsiotpryfile, 'size' : size, 'run'}]
 
 # select funcitons to load
 # with open(filepath, 'wb') as file:
