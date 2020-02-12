@@ -36,8 +36,14 @@ pile = Oslo(L, p)   # Instantiate pile object
 #     there is a definition of the History object
 #     pkl.load()
 
-### BULK PILE TESTING ###
+### PKL TESTING ###
 
-execute_10_piles(4)
+#execute_10_piles(4)
 
+with open('pickle/Oslo_4_2.pkl', 'rb') as file:
+    unpickled_Oslo_4_2 = load(file)
 
+run2_log = unpickled_Oslo_4_2[2]['Log']
+run2_log.plotSnapshot(333)
+
+###

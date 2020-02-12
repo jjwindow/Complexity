@@ -14,6 +14,7 @@ from random import random
 import copy
 import matplotlib.pyplot as plt
 import os
+from pickle import dump, load
 
 class Datalog:
     """
@@ -47,13 +48,21 @@ class Datalog:
     def getSnapshot(self, n):
         """
         Returns the nth instance of the datalog - i.e, a snapshot of the pile after drive n.
-        *Used primarily for debugging*
         """
-
         if type(n) is not int:
             raise TypeError("n parameter must be an integer.")
         return (self.pileLog[n], self.gradsLog[n], self.tholdsLog[n], self.avalsLog[n])
-    
+
+    def plotSnapshot(self, n):
+        """
+        Plots the nth snapshot of the pile. Passing n = -1 will plot the final state of the 
+        pile. Displays bar chart and returns dictionary of snapshot properties.
+        """
+        p, g, t, a = self.getSnapshot(n)
+        plt.bar(range(0, self.L), p, width = 1, align = 'edge')
+        plt.show()
+        return {'Pile' : p, 'Gradients' : g, 'Thresholds' : t, 'Avalanche Sizes' : a}
+
     def getFullHist(self):
         """
         Returns all class attributes in full.
@@ -66,11 +75,6 @@ class Datalog:
         """
         return sum(self.pileLog[n])
 
-    def getHeightAvg(self, n):
-        """
-        Returns average pile height for n most recent drives.
-        """
-        return np.mean([self.pileLog[-i][0] for i in range(0, n)])
     def getHeightsList(self):
         """
         Returns the array of the pile height after each drive.
@@ -79,16 +83,26 @@ class Datalog:
         in the pile.
         """
         return [sum(self.gradsLog[i]) for i in range(0, self.L)]
+
+    def getHeightAvg(self, n):
+        """
+        Returns average pile height for n most recent drives.
+        """
+        heightsList = self.getHeightsList()
+        return np.mean(heightsList[-n:])
+
     def getAvalSizes(self):
         """
         Returns array of avalanche sizes for all system drives.
         """
         return self.avalsLog
+
     def getNumDrives(self):
         """
         Returns number of drives performed on the system
         """
         return len(self.avalsLog)
+
     def plotAvalanches(self):
         """
         Plots the sizes of all avalanches.
@@ -239,18 +253,28 @@ class Oslo:
         """
         return self.pile
     def plotPile(self):
+        """
+        Generates a bar plot of the current state of the pile. When Oslo object
+        instantiated with a steadystatecheck, this becomes equivalent to 
+        Datalog.plotSnapshot(-1), unless it is used before steady state reached.
+        """
         L_axis = [i for i in range(0, self.L)]
         plt.bar(L_axis, self.returnPile(), width = 1, align = 'edge')
         plt.show()
         return (L_axis, self.returnPile())
+
     def returnGrad(self):
         """
         Return array of pile gradients for every site.
+
+        # SHOULD BE ACCESSED FROM DATALOG OBJECT #
         """
         return self.z
     def returnThold(self):
         """
         Returns the threshold gradient for every site.
+
+        # SHOULD BE ACCESSED FROM DATALOG OBJECT #
         """
         return self.z_th
     def returnExited(self, count):
@@ -269,7 +293,7 @@ def execute_10_piles(L):
     p = 0.5             # Oslo model probability parameter. Can be modified for investigation.
     full_entry = []
     for i in range(10):
-        print('i: ', i)
+        # print('i: ', i)
         pile = Oslo(L, p)   # Instantiate pile
         ss = pile.steadyStateCheck(500)
         ss_runs = 3000
@@ -277,14 +301,14 @@ def execute_10_piles(L):
         while ss == False:
             # Drive pile until steady steate reached
             pile.addGrain()
-            r = pile.steadyStateCheck(500)
-            print('not steady state')
+            ss = pile.steadyStateCheck(500)
+            # print('not steady state')
         while j < ss_runs:
             # After steady state reached, keep driving pile for fixed number
             # of runs. This keeps the standard deviations on the steady state
             # heights comparable.
             pile.addGrain()
-            print(j)
+            # print(j)
             j += 1
         run_entry = {'Log' : pile.returnLog(), 'Size' : L, 'Run' : i}
         full_entry.append(run_entry)
