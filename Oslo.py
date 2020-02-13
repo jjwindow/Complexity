@@ -71,7 +71,7 @@ class Datalog:
 
     def getNumGrains(self, n):
         """
-        Returns number of grains in the system at any one time.
+        Returns number of grains in the system at any frame 'n'.
         """
         return sum(self.pileLog[n])
 
@@ -82,7 +82,9 @@ class Datalog:
         at site 0, or equivalently as the sum of all the gradients 
         in the pile.
         """
-        return [sum(self.gradsLog[i]) for i in range(0, self.L)]
+        # # Below relies on saving gradsLog. To save storage so arrays can be saved using pkl, this is discarded.
+        # return [sum(self.gradsLog[i]) for i in range(0, self.L)]
+        return [pile[0] for pile in self.pileLog]
 
     def getHeightAvg(self, n):
         """
