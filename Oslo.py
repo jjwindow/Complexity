@@ -32,7 +32,7 @@ class Datalog:
         self.L = L
         self.p = p
         self.pileLog = []
-        self.gradsLog = []
+        # self.gradsLog = []
         self.tholdsLog = []
         self.avalsLog = []
 
@@ -41,7 +41,7 @@ class Datalog:
         Adds new data to class attributes.
         """
         self.pileLog.append(copy.copy(newHeights))
-        self.gradsLog.append(copy.copy(newGrads))
+        # self.gradsLog.append(copy.copy(newGrads))
         self.tholdsLog.append(copy.copy(newTholds))
         self.avalsLog.append(copy.copy(newAvalanche))
 
@@ -51,28 +51,38 @@ class Datalog:
         """
         if type(n) is not int:
             raise TypeError("n parameter must be an integer.")
-        return (self.pileLog[n], self.gradsLog[n], self.tholdsLog[n], self.avalsLog[n])
+        # return (self.pileLog[n], self.gradsLog[n], self.tholdsLog[n], self.avalsLog[n])
+        return (self.pileLog[n], self.tholdsLog[n], self.avalsLog[n])
 
     def plotSnapshot(self, n):
         """
         Plots the nth snapshot of the pile. Passing n = -1 will plot the final state of the 
         pile. Displays bar chart and returns dictionary of snapshot properties.
         """
-        p, g, t, a = self.getSnapshot(n)
+        if type(n) is not int:
+            raise TypeError("n parameter must be an integer.")
+
+        # p, g, t, a = self.getSnapshot(n)
+        p, t, a = self.getSnapshot(n)
         plt.bar(range(0, self.L), p, width = 1, align = 'edge')
         plt.show()
-        return {'Pile' : p, 'Gradients' : g, 'Thresholds' : t, 'Avalanche Sizes' : a}
+        # return {'Pile' : p, 'Gradients' : g, 'Thresholds' : t, 'Avalanche Sizes' : a}
+        return {'Pile' : p, 'Thresholds' : t, 'Avalanche Sizes' : a}
 
     def getFullHist(self):
         """
         Returns all class attributes in full.
         """
-        return (self.pileLog, self.gradsLog, self.tholdsLog, self.avalsLog)
+        # return (self.pileLog, self.gradsLog, self.tholdsLog, self.avalsLog)
+        return (self.pileLog, self.tholdsLog, self.avalsLog)
 
     def getNumGrains(self, n):
         """
         Returns number of grains in the system at any frame 'n'.
         """
+        if type(n) is not int:
+            raise TypeError("n parameter must be an integer.")
+        
         return sum(self.pileLog[n])
 
     def getHeightsList(self):

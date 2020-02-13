@@ -20,14 +20,6 @@ from Oslo import *
 import numpy as np
 from pickle import dump, load
 
-# execute_10_piles(4)
-# execute_10_piles(8)
-# execute_10_piles(16)
-# execute_10_piles(32)
-# execute_10_piles(64)
-# execute_10_piles(128)
-# execute_10_piles(256)
+#execute_piles(10, 4)
 
-execute_piles(3, 128)
-execute_piles(3, 256)
-# execute_all_sizes()
+execute_all_sizes(5)
