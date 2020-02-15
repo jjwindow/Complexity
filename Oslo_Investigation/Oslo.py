@@ -122,6 +122,32 @@ class Datalog:
         plt.bar(*list(zip(*enumerate(self.avalsLog))), width=1, align = 'edge')
         plt.show()
 
+    def plotHeight(self, plot = False):
+        """
+        Plots individual height graph if plot == True. Returns (num. drives, pile height) as
+        tuple of arrays.
+        """
+        h = []
+        for pile in self.pileLog:
+            h.append(pile[0])
+        if plot == True:
+            plt.xlabel('Number of Drives')
+            plt.ylabel('Pile height')
+            plt.plot(range(len(h)), h, color = 'red')
+            plt.show()
+        return (range(len(h)), h)
+
+    def getGrads(self, n):
+        """
+        Returns nth snapshot of gradients from pile heights.
+        """
+        z = [i-j for i, j in zip(self.pileLog[-1], self.pileLog[-1][1:])]
+        # Gradient of last site is simply its height
+        z.append(self.pileLog[-1][-1])
+        return z
+        
+
+
 class Oslo:
     @staticmethod    
     def thold_gen(p):
@@ -307,7 +333,7 @@ def execute_piles(n, L):
     for i in range(n):
         pile = Oslo(L, p)   # Instantiate pile
         ss = pile.steadyStateCheck(500)
-        ss_runs = 3000
+        ss_runs = 30000
         j = 0
         while ss == False:
             # Drive pile until steady steate reached

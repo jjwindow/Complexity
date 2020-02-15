@@ -141,7 +141,7 @@ class Datalog:
         """
         Returns nth snapshot of gradients from pile heights.
         """
-        z = [i-j for i, j in zip(self.pileLog[-1] self.pileLog[-1][1:])]
+        z = [i-j for i, j in zip(self.pileLog[-1], self.pileLog[-1][1:])]
         # Gradient of last site is simply its height
         z.append(self.pileLog[-1][-1])
         return z
